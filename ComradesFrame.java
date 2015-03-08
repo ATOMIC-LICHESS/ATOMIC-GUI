@@ -37,6 +37,7 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
     Communicator[] COMMUNICATOR_LIST;
     CommunicatorInstance[] INSTANCES;
     int instances;
+    boolean GAME_IS_ON = false;
     boolean READY_OK = false;
     boolean CHANGING_INSTANCES;
     JButton LOAD_BUTTON, DEFAULTS_BUTTON;
@@ -718,13 +719,62 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
         DealCards (S);
     }
 
+    public class PlayGameThread implements Runnable
+    {
+
+	long MOVE_TIME;
+	Random G=new Random();
+
+	public void make_a_move() // using bestmove
+	{
+	    if (INSTANCES[0].on) INSTANCES[0].SendHalt();
+	    if (INSTANCES[1].on) INSTANCES[1].SendHalt();
+	    if (BOARD_PANEL.POS.COUNT_OF_LEGAL_MOVES == 0 // new game!
+		|| BOARD_PANEL.POS.ReversibleCount > 80) NewPGN();
+	    int RC = BOARD_PANEL.POS.ReversibleCount;
+	    // should handle 3-rep !
+	    FEN_AREA.setText (BOARD_PANEL.POS.GetFEN ()); // HACK
+	    MOVE_TIME=500+G.nextInt(1500); // between 5 and 20 seconds
+	    if (RC>20) MOVE_TIME=MOVE_TIME*(100-RC)/200; // boring shuffles
+	    if (BOARD_PANEL.POS.WTM) INSTANCES[1].GoInfinite();
+	    else INSTANCES[0].GoInfinite();
+	}
+
+	public void run()
+	{
+	    int x = 0;
+	    if (instances != 2)
+		{ System.out.println("Need exactly 2 instances!"); return; }
+	    HaltInstances(); // NewGameInstances();
+	    GAME_IS_ON=true; MOVE_TIME=0;
+	    System.out.println("Playing a game (or two)!");
+	    while (GAME_IS_ON) 
+	    {
+		MOVE_TIME-=10; if (MOVE_TIME<0) make_a_move();
+		try {Thread.sleep(10);} catch (InterruptedException e) {}
+	    }
+	    System.out.println("Done playing games!");
+	}
+    }
+
+    public void GameON()
+    {
+	if (GAME_IS_ON) {GAME_IS_ON = false; return;}
+	PlayGameThread PGT = new PlayGameThread(); new Thread(PGT).start();
+    }
+
     public void actionPerformed (ActionEvent act_evt)
     {
 	String S = act_evt.getActionCommand ();
 	if (S.equals ("OPTIONS"))
 	    new ComradesOptioner (this); // modal
-	if (S.equals ("SetUpPosition"))
-	    BOARD_PANEL.StartSetUp ();
+	if (S.equals ("SetUpPosition")) // plays a game when SHIFT is down!
+	    {
+		if ((act_evt.getModifiers() & ActionEvent.SHIFT_MASK) != 0)
+		    GameON ();
+		else
+		    BOARD_PANEL.StartSetUp ();
+	    }
 	if (S.equals ("FEN"))
 	    {
 		if ((act_evt.getModifiers() & ActionEvent.SHIFT_MASK) != 0)

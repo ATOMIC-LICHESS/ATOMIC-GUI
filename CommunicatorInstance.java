@@ -216,11 +216,12 @@ public class CommunicatorInstance extends CommIO implements MouseListener, Chang
     {
 	SendTo ("stop", true);
 	boolean BREAK = false;
+	String S=null;
 	while (!BREAK)
 	    {
 		if (IsReady ())
 		    {
-			String S = DemandLine ();
+			S = DemandLine ();
 			if (S.startsWith ("bestmove"))
 			    BREAK = true;
 			else
@@ -229,6 +230,7 @@ public class CommunicatorInstance extends CommIO implements MouseListener, Chang
 		else
 		    SleepFor (10);
 	    }
+	DoBestMove(S.substring(9));
 	SendTo ("isready", true);
 	if (!WaitForThroughPut ("readyok", 10000, false)) // 10s
 	    {
@@ -443,7 +445,9 @@ public class CommunicatorInstance extends CommIO implements MouseListener, Chang
 
     public void DoBestMove (String S) // battle ?
     {
-	SendHalt (); // HACK
+	if (CF.GAME_IS_ON)
+	{CF.BOARD_PANEL.POS.makeUCI(S); CF.BOARD_PANEL.repaint();}
+	// SendHalt (); // HACK
     }
     
     public String AttendForm (String S, BoardPosition BP, int i)
@@ -461,7 +465,7 @@ public class CommunicatorInstance extends CommIO implements MouseListener, Chang
 	BP.MakeMove (w);
 	BP.MakeNormal ();
 	if (BP.COUNT_OF_LEGAL_MOVES == 0)
-	    R += (IS_CHECK) ? "#" : "=";
+	    R += (IS_CHECK || BP.EXPLODED) ? "#" : "=";
 	return R;
     }
 

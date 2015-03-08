@@ -6,7 +6,7 @@ public class BoardPosition
     int WHITE_KingFile, WHITE_KingRank, BLACK_KingFile, BLACK_KingRank;
     int MOVE_NUMBER, EnPassant, ReversibleCount;
     int COUNT_OF_LEGAL_MOVES;
-    boolean WTM, WhiteOOO, WhiteOO, BlackOOO, BlackOO, Chess960;
+    boolean WTM, WhiteOOO, WhiteOO, BlackOOO, BlackOO, Chess960, EXPLODED;
     int White_KR_file, White_QR_file, Black_KR_file, Black_QR_file;
     int Chess960_WK_File, Chess960_BK_File;
     long move_list[];
@@ -32,6 +32,7 @@ public class BoardPosition
 	BLACK_KingRank = BP.BLACK_KingRank;
 	MOVE_NUMBER = BP.MOVE_NUMBER;
 	EnPassant = BP.EnPassant;
+	EXPLODED = false;
 	ReversibleCount = BP.ReversibleCount;
 	COUNT_OF_LEGAL_MOVES = BP.COUNT_OF_LEGAL_MOVES;
 	WTM = BP.WTM;
@@ -1705,6 +1706,7 @@ public class BoardPosition
 		move_list[i] = 0;
 		move_list_annotated[i] = new String ("");
 	    }
+	WHITE_KingFile=WHITE_KingRank=BLACK_KingFile=BLACK_KingRank=0;
 	for (int rank = 1; rank <= 8; rank++)
 	    for (int file = 1; file <= 8; file++)
 		{
@@ -1764,8 +1766,10 @@ public class BoardPosition
 		else if (!WTM && AT[EnPassant + 1][4] != -1 && AT[EnPassant - 1][4] != -1)
 		    EnPassant = 0;
 	    }
-	COUNT_OF_LEGAL_MOVES = 0;
+	COUNT_OF_LEGAL_MOVES = 0; EXPLODED=false;
 	GenerateAllMoves ();
+	if (WHITE_KingFile==0 || BLACK_KingFile==0)
+	{  EXPLODED=true; COUNT_OF_LEGAL_MOVES=0;  }
 	ComplyLastMove ();
     }
 
@@ -2171,6 +2175,21 @@ public class BoardPosition
     public void MakeMove (int w)
     {
 	MakeMove32 (move_list[w], move_list_annotated[w]);
+    }
+
+    public void makeUCI(String S)
+    {
+      int x=0; StringBuffer SB=new StringBuffer(S);
+      // System.out.println("makeuci "+S);
+      x+=(int) (S.charAt(0)-'a');
+      x+=8*(int) (S.charAt(1)-'1');
+      x+=64*(int) (S.charAt(2)-'a');
+      x+=512*(int) (S.charAt(3)-'1');
+      for (int i = 0; i < COUNT_OF_LEGAL_MOVES; i++)
+      {  if (x==(int) (move_list[i]&07777))
+	      {MakeMove(i); MakeNormal(); return; }}
+      System.out.println("Error in makeUCI "+S);
+      System.exit(1);
     }
 
     public void DisAttendMove32 (long mv)
