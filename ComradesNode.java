@@ -4,7 +4,7 @@ public class ComradesNode extends DefaultMutableTreeNode
 {
     ComradesNode PARENT; // proper
     TypeMove mv, mainline;
-    long hash;
+    long hash = 0;
     boolean is_expanded = false;
     ComradesNode transpose, MainLineNode, MainLineParent;
     ComradesLabel LABEL;
