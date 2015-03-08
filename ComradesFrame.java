@@ -884,7 +884,8 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 
     public void focusGained (FocusEvent foc_evt)
     {
-	if (BOARD_PANEL.POS.MOVE_TREE.FOCUS)
+	if (BOARD_PANEL.POS.MOVE_TREE.FOCUS &&
+	    BOARD_PANEL.POS.MOVE_TREE.NOW.LABEL != null) // parallel
 	    BOARD_PANEL.POS.MOVE_TREE.NOW.LABEL.requestFocus (); // HACK
     }
 
