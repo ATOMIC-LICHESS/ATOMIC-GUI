@@ -6,7 +6,8 @@ public class BoardPosition
     int WHITE_KingFile, WHITE_KingRank, BLACK_KingFile, BLACK_KingRank;
     int MOVE_NUMBER, EnPassant, ReversibleCount;
     int COUNT_OF_LEGAL_MOVES;
-    boolean WTM, WhiteOOO, WhiteOO, BlackOOO, BlackOO, Chess960, EXPLODED;
+    boolean WTM, WhiteOOO, WhiteOO, BlackOOO, BlackOO, Chess960;
+    boolean EXPLODED, LOW_MATERIAL;
     int White_KR_file, White_QR_file, Black_KR_file, Black_QR_file;
     int Chess960_WK_File, Chess960_BK_File;
     long move_list[];
@@ -33,6 +34,7 @@ public class BoardPosition
 	MOVE_NUMBER = BP.MOVE_NUMBER;
 	EnPassant = BP.EnPassant;
 	EXPLODED = false;
+	LOW_MATERIAL = false;
 	ReversibleCount = BP.ReversibleCount;
 	COUNT_OF_LEGAL_MOVES = BP.COUNT_OF_LEGAL_MOVES;
 	WTM = BP.WTM;
@@ -1701,6 +1703,7 @@ public class BoardPosition
 
     public void MakeNormal ()
     {
+	int piece_count=0;
 	for (int i = 0; i < COUNT_OF_LEGAL_MOVES; i++)
 	    {
 		move_list[i] = 0;
@@ -1710,6 +1713,7 @@ public class BoardPosition
 	for (int rank = 1; rank <= 8; rank++)
 	    for (int file = 1; file <= 8; file++)
 		{
+		    if (AT[file][rank] != 0) piece_count++;
 		    if (AT[file][rank] == 6)
 			{
 			    WHITE_KingFile = file;
@@ -1721,6 +1725,7 @@ public class BoardPosition
 			    BLACK_KingRank = rank;
 			}
 		}
+	LOW_MATERIAL=(piece_count<=3);
 	if (Chess960)
 	    {
 		if (AT[Chess960_WK_File][1] != 6)
@@ -2177,20 +2182,32 @@ public class BoardPosition
 	MakeMove32 (move_list[w], move_list_annotated[w]);
     }
 
+////////////////////////////////////////////////////////////////
+
     public void makeUCI(String S)
     {
-      int x=0; StringBuffer SB=new StringBuffer(S);
+      int x=0;
       // System.out.println("makeuci "+S);
       x+=(int) (S.charAt(0)-'a');
       x+=8*(int) (S.charAt(1)-'1');
       x+=64*(int) (S.charAt(2)-'a');
       x+=512*(int) (S.charAt(3)-'1');
+      if (S.length()>4) // promotion
+      {
+	  if (S.charAt(4)=='q') x+=(5<<17);
+	  if (S.charAt(4)=='r') x+=(4<<17);
+	  if (S.charAt(4)=='b') x+=(3<<17);
+	  if (S.charAt(4)=='n') x+=(2<<17);
+      }
+
       for (int i = 0; i < COUNT_OF_LEGAL_MOVES; i++)
-      {  if (x==(int) (move_list[i]&07777))
+      {  if (x==(int) (move_list[i]&0xe0fff))
 	      {MakeMove(i); MakeNormal(); return; }}
       System.out.println("Error in makeUCI "+S);
       System.exit(1);
     }
+
+////////////////////////////////////////////////////////////////
 
     public void DisAttendMove32 (long mv)
     {

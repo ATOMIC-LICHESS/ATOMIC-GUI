@@ -719,6 +719,8 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
         DealCards (S);
     }
 
+////////////////////////////////////////////////////////////////
+
     public class PlayGameThread implements Runnable
     {
 
@@ -730,12 +732,15 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 	    if (INSTANCES[0].on) INSTANCES[0].SendHalt();
 	    if (INSTANCES[1].on) INSTANCES[1].SendHalt();
 	    if (BOARD_PANEL.POS.COUNT_OF_LEGAL_MOVES == 0 // new game!
-		|| BOARD_PANEL.POS.ReversibleCount > 80) NewPGN();
-	    int RC = BOARD_PANEL.POS.ReversibleCount;
+		|| BOARD_PANEL.POS.LOW_MATERIAL // 3 pieces or less
+		|| BOARD_PANEL.POS.ReversibleCount > 50) NewPGN();
 	    // should handle 3-rep !
 	    FEN_AREA.setText (BOARD_PANEL.POS.GetFEN ()); // HACK
-	    MOVE_TIME=500+G.nextInt(1500); // between 5 and 20 seconds
-	    if (RC>20) MOVE_TIME=MOVE_TIME*(100-RC)/200; // boring shuffles
+	    int MOVE_MIN=1000; int MOVE_MAX=1001;
+	    int mc = BOARD_PANEL.POS.MOVE_NUMBER;
+	    if (mc<50) MOVE_MIN+=(50-mc)*40; // 3s at start
+	    if (mc<60) MOVE_MAX+=(60-mc)*100; // 7s at start
+	    MOVE_TIME=MOVE_MIN+G.nextInt(MOVE_MAX-MOVE_MIN);
 	    if (BOARD_PANEL.POS.WTM) INSTANCES[1].GoInfinite();
 	    else INSTANCES[0].GoInfinite();
 	}
@@ -762,6 +767,8 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 	if (GAME_IS_ON) {GAME_IS_ON = false; return;}
 	PlayGameThread PGT = new PlayGameThread(); new Thread(PGT).start();
     }
+
+////////////////////////////////////////////////////////////////
 
     public void actionPerformed (ActionEvent act_evt)
     {
