@@ -57,7 +57,6 @@ public class MoveTree extends JTree // JPanel ?
 	int cnt=0;
 	while (CN != NOW)
 	    {
-		System.out.println(CN.hash);
 		if (CN.hash==H && CN.hash!=0) cnt++;
 		CN=CN.MainLineNode;
 	    }
