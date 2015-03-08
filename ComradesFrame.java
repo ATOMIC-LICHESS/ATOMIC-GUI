@@ -726,6 +726,50 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 
 	long MOVE_TIME;
 	Random G=new Random();
+	String[] BOOK_DATA;
+	int book_num=0;
+
+	public boolean IsDigit (char x)
+	{
+	    return ((x >= '1') && (x <= '8'));
+	}
+
+	public void play_move_str(String S)
+	{
+	    System.out.println("Opening is "+S);
+	    StringTokenizer ST=new StringTokenizer(S);
+	    while (ST.hasMoreTokens())
+	    {
+		String X=ST.nextToken();
+		if (IsDigit(X.charAt(0))) continue;
+		int w=BOARD_PANEL.POS.NotateComparison(X); if (w==-1) return;
+		BOARD_PANEL.POS.MakeMove (w);
+		BOARD_PANEL.POS.MakeNormal();
+	    }
+	    // set "last book move" in PGN somehow?
+	    BOARD_PANEL.repaint();
+	}
+
+	public void playRandomOpening()
+	{
+	    if (BOOK_DATA == null)
+	    {
+		BOOK_DATA = new String[10000];
+		try
+		{
+		    File F=new File("TEMP.book");
+		    FileReader FR = new FileReader(F);
+		    BufferedReader BR = new BufferedReader(FR);
+		    String line;
+		    while ((line=BR.readLine())!=null)
+			BOOK_DATA[book_num++]=new String(line);
+		}
+		catch (IOException e) {}
+		System.out.println(book_num+" openings found");
+	    }
+	    if (book_num==0) return; // book not found
+	    play_move_str(BOOK_DATA[G.nextInt(book_num)]);
+	}
 
 	public void make_a_move() // using bestmove
 	{
@@ -735,7 +779,10 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 		|| BOARD_PANEL.POS.LOW_MATERIAL // 3 pieces or less
 		|| BOARD_PANEL.POS.ReversibleCount > 50	// > 50 ply is boring
 		|| BOARD_PANEL.POS.MOVE_TREE.is_repetition())
-		NewPGN(); // new game!
+	     {
+		 NewPGN(); // new game!
+		 playRandomOpening();
+	     }
 	    // Attach result to PGN somehow? // LOW_MATERIAL could be tricky
 	    FEN_AREA.setText (BOARD_PANEL.POS.GetFEN ()); // HACK
 	    int MOVE_MIN=1000; int MOVE_MAX=1001;
@@ -754,6 +801,8 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 	    if (instances != 2)
 		{ System.out.println("Need exactly 2 instances!"); return; }
 	    HaltInstances(); // NewGameInstances();
+	    if (BOARD_PANEL.POS.MOVE_NUMBER==1 && BOARD_PANEL.POS.WTM)
+	    { NewPGN(); playRandomOpening(); }
 	    GAME_IS_ON=true; MOVE_TIME=0;
 	    System.out.println("Playing a game (or two)!");
 	    while (GAME_IS_ON) 
