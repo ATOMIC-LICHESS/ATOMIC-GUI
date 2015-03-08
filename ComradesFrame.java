@@ -731,15 +731,18 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 	{
 	    if (INSTANCES[0].on) INSTANCES[0].SendHalt();
 	    if (INSTANCES[1].on) INSTANCES[1].SendHalt();
-	    if (BOARD_PANEL.POS.COUNT_OF_LEGAL_MOVES == 0 // new game!
+	    if (BOARD_PANEL.POS.COUNT_OF_LEGAL_MOVES == 0
 		|| BOARD_PANEL.POS.LOW_MATERIAL // 3 pieces or less
-		|| BOARD_PANEL.POS.ReversibleCount > 50) NewPGN();
-	    // should handle 3-rep !
+		|| BOARD_PANEL.POS.ReversibleCount > 50	// > 50 ply is boring
+		|| BOARD_PANEL.POS.MOVE_TREE.is_repetition())
+		NewPGN(); // new game!
+	    // Attach result to PGN somehow? // LOW_MATERIAL could be tricky
 	    FEN_AREA.setText (BOARD_PANEL.POS.GetFEN ()); // HACK
 	    int MOVE_MIN=1000; int MOVE_MAX=1001;
-	    int mc = BOARD_PANEL.POS.MOVE_NUMBER;
-	    if (mc<50) MOVE_MIN+=(50-mc)*40; // 3s at start
-	    if (mc<60) MOVE_MAX+=(60-mc)*100; // 7s at start
+	    int mc = BOARD_PANEL.POS.MOVE_NUMBER+
+		BOARD_PANEL.POS.ReversibleCount;
+	    if (mc<30) MOVE_MIN+=(30-mc)*70; // 3.1s at start
+	    if (mc<40) MOVE_MAX+=(40-mc)*150; // 7s at start
 	    MOVE_TIME=MOVE_MIN+G.nextInt(MOVE_MAX-MOVE_MIN);
 	    if (BOARD_PANEL.POS.WTM) INSTANCES[1].GoInfinite();
 	    else INSTANCES[0].GoInfinite();

@@ -50,6 +50,20 @@ public class MoveTree extends JTree // JPanel ?
 	FOCUS = false;
     }
 
+    public boolean is_repetition()
+    {
+	long H = NOW.hash;
+	ComradesNode CN = ROOT;
+	int cnt=0;
+	while (CN != NOW)
+	    {
+		System.out.println(CN.hash);
+		if (CN.hash==H && CN.hash!=0) cnt++;
+		CN=CN.MainLineNode;
+	    }
+	return (cnt>=2); // current node does not count
+    }
+
     public void JumpToNode (ComradesNode N)
     {
 	ComradesNode T = N;

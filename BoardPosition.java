@@ -20,6 +20,7 @@ public class BoardPosition
     int LAST_FROM_y = 0;
     int LAST_TO_x = 0;
     int LAST_TO_y = 0;
+    long computed_hash = 0;
 
     public BoardPosition (BoardPosition BP) // copy
     {
@@ -1701,9 +1702,21 @@ public class BoardPosition
 	MakeNotation();
     }
 
+    long[] Zobrist;
+    public void initZobrist()
+    {
+	Random G=new Random();
+	for (int i=0;i<13*64;i++)
+	    Zobrist[i]= ((long) G.nextInt(0x7fffffff)<<31) |
+		         (long) G.nextInt(0x7fffffff);
+    }
+
+
     public void MakeNormal ()
     {
 	int piece_count=0;
+	computed_hash = 0;
+	if (Zobrist == null) { Zobrist=new long[13*64]; initZobrist(); }
 	for (int i = 0; i < COUNT_OF_LEGAL_MOVES; i++)
 	    {
 		move_list[i] = 0;
@@ -1713,6 +1726,9 @@ public class BoardPosition
 	for (int rank = 1; rank <= 8; rank++)
 	    for (int file = 1; file <= 8; file++)
 		{
+		    computed_hash ^=
+			Zobrist[64*(AT[file][rank]+6)+8*(file-1)+(rank-1)];
+				// don't worry about ep and oo
 		    if (AT[file][rank] != 0) piece_count++;
 		    if (AT[file][rank] == 6)
 			{
@@ -2202,7 +2218,7 @@ public class BoardPosition
 
       for (int i = 0; i < COUNT_OF_LEGAL_MOVES; i++)
       {  if (x==(int) (move_list[i]&0xe0fff))
-	      {MakeMove(i); MakeNormal(); return; }}
+	      {  MakeMove(i); MakeNormal(); return; }}
       System.out.println("Error in makeUCI "+S);
       System.exit(1);
     }
@@ -2453,6 +2469,12 @@ public class BoardPosition
 	WTM = !WTM;
 	if (WTM)
 	    MOVE_NUMBER++;	
+	if (MOVE_TREE != null)
+	{
+	    MakeNormal();
+	    MOVE_TREE.NOW.hash = computed_hash;
+	    MOVE_TREE.is_repetition();
+	}
     }
  }
  
