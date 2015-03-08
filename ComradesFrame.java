@@ -741,8 +741,8 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 	    int MOVE_MIN=1000; int MOVE_MAX=1001;
 	    int mc = BOARD_PANEL.POS.MOVE_NUMBER+
 		BOARD_PANEL.POS.ReversibleCount;
-	    if (mc<30) MOVE_MIN+=(30-mc)*70; // 3.1s at start
-	    if (mc<40) MOVE_MAX+=(40-mc)*150; // 7s at start
+	    if (mc<35) MOVE_MIN+=(35-mc)*60; // 3.1s at start
+	    if (mc<50) MOVE_MAX+=(50-mc)*120; // 7s at start
 	    MOVE_TIME=MOVE_MIN+G.nextInt(MOVE_MAX-MOVE_MIN);
 	    if (BOARD_PANEL.POS.WTM) INSTANCES[1].GoInfinite();
 	    else INSTANCES[0].GoInfinite();
