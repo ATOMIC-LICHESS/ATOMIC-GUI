@@ -1715,6 +1715,8 @@ public class BoardPosition
     public void MakeNormal ()
     {
 	int piece_count=0;
+	boolean PAWN_LEFT = false, QUEEN_LEFT = false;
+	boolean KINGS_GRAPPLED = false;
 	computed_hash = 0;
 	if (Zobrist == null) { Zobrist=new long[13*64]; initZobrist(); }
 	for (int i = 0; i < COUNT_OF_LEGAL_MOVES; i++)
@@ -1730,6 +1732,10 @@ public class BoardPosition
 			Zobrist[64*(AT[file][rank]+6)+8*(file-1)+(rank-1)];
 				// don't worry about ep and oo
 		    if (AT[file][rank] != 0) piece_count++;
+		    if (AT[file][rank] == 1 || AT[file][rank]==-1)
+			PAWN_LEFT = true;
+		    if (AT[file][rank] == 5 || AT[file][rank]==-5)
+			QUEEN_LEFT = true;
 		    if (AT[file][rank] == 6)
 			{
 			    WHITE_KingFile = file;
@@ -1741,7 +1747,16 @@ public class BoardPosition
 			    BLACK_KingRank = rank;
 			}
 		}
-	LOW_MATERIAL=(piece_count<=3);
+	
+	if (WHITE_KingFile-BLACK_KingFile <= 1 &&
+	    -1 <= WHITE_KingFile-BLACK_KingFile &&
+	    WHITE_KingRank-BLACK_KingRank <= 1 &&
+	    -1 <= WHITE_KingRank-BLACK_KingRank)
+	    KINGS_GRAPPLED = true;
+
+	LOW_MATERIAL = (!PAWN_LEFT && !QUEEN_LEFT) || KINGS_GRAPPLED;
+       	LOW_MATERIAL &= (piece_count<=3);
+
 	if (Chess960)
 	    {
 		if (AT[Chess960_WK_File][1] != 6)
