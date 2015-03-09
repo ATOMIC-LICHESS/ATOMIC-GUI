@@ -24,7 +24,8 @@ public class BoardPanel extends JPanel implements MouseListener
     BoardPosition POS;
     boolean REVERSE = false, SET_UP = false;
     String Name = null;
-    String White = null, Black = null, Result = null;
+    String White = "White", Black = "Black", Result = null;
+    String Reason = "";
 
     public BoardPanel (BoardPosition pos)
     {
