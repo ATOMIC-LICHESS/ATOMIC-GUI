@@ -259,7 +259,8 @@ public class MoveTree extends JTree // JPanel ?
 	    S += "[FEN \"" + START_FEN + "\"]\n";
 	S += "\n" +
 	    LineSplit (SubPGN (ROOT, 2 * MOVE_NUMBER + (WTM ? 0 : 1), false)
-		       + " " + BP.PANEL.Result, 75);
+			+ " " + BP.PANEL.Result
+			+ " { " + BP.PANEL.Reason + " }", 75);
 	return S + "\n";
     }
 
@@ -296,7 +297,8 @@ public class MoveTree extends JTree // JPanel ?
 	if (!WTM)
 	    S += "" + MOVE_NUMBER + "... ";
 	S += LineSplit (MainLinePGN (2 * MOVE_NUMBER + (WTM ? 0 : 1))
-			+ " " + BP.PANEL.Result, 75);
+			+ " " + BP.PANEL.Result
+			+ " { " + BP.PANEL.Reason + " }", 75);
 	return S + "\n";
     }
 
