@@ -731,7 +731,7 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 
 	public boolean IsDigit (char x)
 	{
-	    return ((x >= '1') && (x <= '8'));
+	    return ((x >= '1') && (x <= '9'));
 	}
 
 	public void play_move_str(String S)
@@ -768,22 +768,50 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 		System.out.println(book_num+" openings found");
 	    }
 	    if (book_num==0) return; // book not found
-	    play_move_str(BOOK_DATA[G.nextInt(book_num)]);
+	    int r = G.nextInt(book_num);
+	    play_move_str(BOOK_DATA[r]);
 	}
 
 	public void make_a_move() // using bestmove
 	{
+	    boolean OVER = false;
 	    if (INSTANCES[0].on) INSTANCES[0].SendHalt();
 	    if (INSTANCES[1].on) INSTANCES[1].SendHalt();
-	    if (BOARD_PANEL.POS.COUNT_OF_LEGAL_MOVES == 0
-		|| BOARD_PANEL.POS.LOW_MATERIAL // 3 pieces or less
-		|| BOARD_PANEL.POS.ReversibleCount > 50	// > 50 ply is boring
-		|| BOARD_PANEL.POS.MOVE_TREE.is_repetition())
-	     {
-		 NewPGN(); // new game!
-		 playRandomOpening();
-	     }
-	    // Attach result to PGN somehow? // LOW_MATERIAL could be tricky
+	    if (BOARD_PANEL.POS.EXPLODED)
+	    {
+		OVER = true;
+		BOARD_PANEL.Result = BOARD_PANEL.POS.WTM ? "0-1" : "1-0";
+		BOARD_PANEL.Reason = "King exploded";
+	    }
+	    else if (BOARD_PANEL.POS.COUNT_OF_LEGAL_MOVES == 0)
+	    {
+		OVER = true;
+		if (BOARD_PANEL.POS.MOVE_TREE.NOW.mv.fancy.indexOf("+")==-1)
+		{ BOARD_PANEL.Reason = "Stalemate";
+		  BOARD_PANEL.Result = "1/2-1/2"; }
+		else
+		{ BOARD_PANEL.Result =  BOARD_PANEL.POS.WTM ? "0-1" : "1-0";
+		  BOARD_PANEL.Reason = "Checkmate"; }
+	    }
+	    else if (BOARD_PANEL.POS.MOVE_TREE.is_repetition())
+	    {
+		OVER = true;
+		BOARD_PANEL.Result = "1/2-1/2";
+		BOARD_PANEL.Reason = "Draw by Repetition";
+	    }
+	    else if (BOARD_PANEL.POS.ReversibleCount > 50)
+	    {
+		OVER = true;
+		BOARD_PANEL.Result = "1/2-1/2";
+		BOARD_PANEL.Reason = "Adjudicated draw at 50 reversible ply";
+	    }
+	    else if (BOARD_PANEL.POS.LOW_MATERIAL)
+	    {
+		OVER = true;
+		BOARD_PANEL.Result = "1/2-1/2";
+		BOARD_PANEL.Reason = "Draw due to insufficient material";
+	    }
+	    if (OVER) { NewPGN(); playRandomOpening(); }
 	    FEN_AREA.setText (BOARD_PANEL.POS.GetFEN ()); // HACK
 	    int MOVE_MIN=1000; int MOVE_MAX=1001;
 	    int mc = BOARD_PANEL.POS.MOVE_NUMBER+
