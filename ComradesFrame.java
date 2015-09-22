@@ -1114,7 +1114,7 @@ public class ComradesFrame implements MouseListener, ActionListener, FocusListen
 
     public void MakeFrame ()
     {
-	j_frame = new JFrame ("ComradesGUI ATOMIC");
+	j_frame = new JFrame ("AtomicGUI");
 	j_frame.addWindowListener
 	    (new WindowAdapter()
 		{
