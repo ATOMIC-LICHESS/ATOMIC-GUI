@@ -6,7 +6,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 
-public class ComradesGUI extends Applet
+public class AtomicGUI extends Applet
 {
     String PATH;
     static ComradesFrame RF;
@@ -27,7 +27,7 @@ public class ComradesGUI extends Applet
 	    {
 		FileReader FR = new FileReader (file);
 		BR = new BufferedReader (FR);
-		RF.TellInfo ("Reading ComradesGUI.config file");
+		RF.TellInfo ("Reading AtomicGUI.config file");
 		while (BR.ready ())
 		    {
 			ProcessConfig (BR.readLine ());
@@ -44,9 +44,9 @@ public class ComradesGUI extends Applet
     {
 	PATH = getClass ().getProtectionDomain ().getCodeSource ().
 	    getLocation ().toString ();
-	File file = new File ("ComradesGUI.config");
+	File file = new File ("AtomicGUI.config");
 	if (!file.exists ())
-	    RF.TellInfo ("No ComradesGUI.config file noticed");
+	    RF.TellInfo ("No AtomicGUI.config file noticed");
 	else
 	    ReadConfigFile (file);
     }
@@ -103,7 +103,7 @@ public class ComradesGUI extends Applet
     public static void main (String[] Arguments)
     {
 	LookAndFeel (); // uniformed
-	ComradesGUI RE = new ComradesGUI ();
+	AtomicGUI RE = new AtomicGUI ();
 	RE.MakeComradesFrame ();
 	//	RE.LoadStartup (); // for the off
 	RE.RunLoop ();
