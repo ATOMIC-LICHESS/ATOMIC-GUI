@@ -1,4 +1,6 @@
 
 Compile with "make"
 
-Run with "java ComradesGUI"
+Run with "java AtomicGUI"
+
+Or with java -jar AtomicGUI.jar
